@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { FirebaseAdminProvider } from './common/firebase/firebase.provider';
 import { HealthModule } from './health/health.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HealthModule } from './health/health.module';
     UsersModule,
     AuthModule,
     HealthModule,
+    ProductsModule,
   ],
   controllers: [HealthController],
   providers: [FirebaseAdminProvider],
