@@ -1,27 +1,42 @@
+// firebase-auth.guard.ts
 import {
+  Injectable,
   CanActivate,
   ExecutionContext,
-  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
-  async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    const req = ctx.switchToHttp().getRequest() as any;
-    const auth = req.headers['authorization'] as string | undefined;
-    if (!auth || !auth.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing Bearer token');
-    }
-    const idToken = auth.slice('Bearer '.length);
+  constructor(private readonly usersService: UsersService) {}
 
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const req = ctx.switchToHttp().getRequest();
+    const authHeader = req.headers['authorization'];
+
+    if (!authHeader)
+      throw new UnauthorizedException('Missing Authorization header');
+
+    const token = authHeader.split(' ')[1];
     try {
-      const decoded = await admin.auth().verifyIdToken(idToken, true);
-      req.user = decoded; // attach decoded token to request
+      // 1. Verify Firebase JWT
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      req.firebaseUser = decodedToken;
+
+      // 2. Find user in MongoDB
+      const userDoc = await this.usersService.findByUid(decodedToken.uid);
+      if (!userDoc) {
+        throw new UnauthorizedException('User not found in database');
+      }
+
+      // 3. Attach to request
+      req.userDoc = userDoc;
       return true;
-    } catch {
-      throw new UnauthorizedException('Invalid or expired Firebase token');
+    } catch (err) {
+      console.error(err);
+      throw new UnauthorizedException('Invalid or expired token');
     }
   }
 }

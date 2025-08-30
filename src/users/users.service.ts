@@ -8,7 +8,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findByUid(uid: string) {
-    return this.userModel.findOne({ uid }).lean();
+    return this.userModel.findOne({ uid }).exec();
   }
 
   async upsertFromFirebaseToken(decoded: any) {
