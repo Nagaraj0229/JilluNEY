@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // ✅ capture raw body for Stripe webhook
+  app.use('/payments/webhook', bodyParser.raw({ type: 'application/json' }));
 
   // Simple CORS for local dev
   const origin = process.env.CORS_ORIGIN || 'http://localhost:5173';

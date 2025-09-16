@@ -22,6 +22,11 @@ export class Order extends Document {
 
   @Prop({ default: 'pending' })
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+
+  @Prop({
+    required: true,
+  })
+  userEmail: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

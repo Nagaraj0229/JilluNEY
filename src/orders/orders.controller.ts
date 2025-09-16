@@ -18,9 +18,14 @@ import { RolesGuard } from '../auth/roles.guard';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @UseGuards(FirebaseAuthGuard)
   @Post()
-  async createOrder(@Req() req) {
-    return this.ordersService.createOrder(req.user.uid);
+  async createOrder(@Req() req, @Body() body: { paymentMethod: string }) {
+    return this.ordersService.createOrder(
+      req.user.uid,
+      req.user.email,
+      body.paymentMethod || 'cod',
+    );
   }
 
   @Get()
@@ -37,5 +42,23 @@ export class OrdersController {
   @UseGuards(new RolesGuard(['admin']))
   async updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.ordersService.updateStatus(id, status);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Get(':id/status')
+  async getStatus(@Param('id') id: string) {
+    return this.ordersService.getOrderStatus(id);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Get()
+  async listOrders(@Req() req) {
+    return this.ordersService.getUserOrders(req.user.uid);
+  }
+
+  @UseGuards(FirebaseAuthGuard, new RolesGuard(['admin']))
+  @Get('all')
+  async listAllOrders() {
+    return this.ordersService.getAllOrders();
   }
 }
