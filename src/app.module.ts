@@ -8,6 +8,8 @@ import { FirebaseAdminProvider } from './common/firebase/firebase.provider';
 import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
+import { OrdersModule } from './orders/orders.module';
+import { MailerModule } from './mail/mailer.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { CartModule } from './cart/cart.module';
     HealthModule,
     ProductsModule,
     CartModule,
+    OrdersModule,
+    MailerModule,
   ],
   controllers: [HealthController],
   providers: [FirebaseAdminProvider],
